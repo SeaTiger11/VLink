@@ -1,0 +1,118 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Web3.js LIBRARY -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.1/web3.min.js"
+      integrity="sha512-GKw4QT/RccGJIwQxY3MhyiQ5pHrhQ8SuKFEafV+WcpOvtz7iYFQuQGFCvmGlHLctJTe8KrWU1FqvF7VOkEAJtw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+    <script>
+        // Create a client instance
+        client = new Paho.MQTT.Client('broker.hivemq.com', Number(8000), "VLink" + new Date().getSeconds());
+
+        // set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // connect the client
+        client.connect({onSuccess:onConnect});
+
+        function link() {
+            linkCode = document.getElementById('vlinkCode').value;
+            linkChannel = 'VLink' + linkCode;
+            //document.getElementById('warning').style.display = "flex";
+
+            subscribe(linkChannel);
+            sendMessage("Wallet: " + window.userWalletAddress, linkChannel)
+
+            document.querySelector(".login-section").style.display = "none";
+            document.querySelector(".dashboard-section").style.display = "none";
+            document.querySelector(".connected-section").style.display = "flex";
+
+            document.querySelector(".connected-wallet-address").innerHTML = window.userWalletAddress;
+            document.querySelector(".connected-vlink-code").innerHTML = linkCode;
+        }
+
+        function subscribe(channel) {
+            client.subscribe(channel);
+        }
+
+        function sendMessage(messageText, channel) {
+            message = new Paho.MQTT.Message(messageText);
+            message.destinationName = channel;
+            client.send(message);
+        }
+
+        // called when the client connects
+        function onConnect() {
+            console.log("Connected");
+        }
+
+        // called when the client loses its connection
+        function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+                console.log("onConnectionLost:"+responseObject.errorMessage);
+            }
+        }
+
+        // called when a message arrives
+        function onMessageArrived(message) {
+            splitMessage = message.payloadString.split(' ');
+            if (splitMessage[0] == "Function:") { //If the message starts with "Function: " then excute the rest of the string as a function
+                eval(splitMessage.slice(1).join(" "));
+            }
+
+            console.log("onMessageArrived:"+message.payloadString);
+        }
+    </script>
+
+    <!-- CSS STYLES -->
+    <link rel="stylesheet" href="index.css" />
+    <title>Web3 Login</title>
+  </head>
+  <body>
+
+    <!-- LOGIN SECTION -->
+    <section class="login-section">
+      <button class="login-btn">🔓 Log in with Web3</button>
+      <span class="instruction">
+        Ensure to have an Ethereum based wallet installed i.e MetaMask
+      </span>
+    </section>
+
+    <!-- DASHBOARD SECTION -->
+    <section class="dashboard-section">
+      <h2 class="wallet-status">Wallet Connected! 🤝</h2>
+      <h3 class="wallet-address-heading">
+        ETH Wallet Address:
+        <span class="wallet-address"></span>
+      </h3>
+      <h3 class="vlink-code-heading">
+       VLink Code:
+        <input name="vlinkCode" type="text" maxlength="5" id="vlinkCode" class="vlink-code"/> <div class="warning" id="warning">Wrong Code</div>
+      </h3>
+      <button class="connect-btn">🔗 Link to headset</button>
+      <button class="logout-btn">🔐 Log out</button>
+    </section>
+
+  <!-- CONNECTED SECTION -->
+  <section class="connected-section">
+    <span class="connected-wallet-address"></span>
+    <span class="connected-vlink-code">test</span>
+  </section>
+
+  <!-- SCRIPT -->
+  <script src="./index.js"></script>
+  <script> 
+        document.querySelector(".connect-btn").addEventListener("click", link);
+  </script>
+</html>
