@@ -2,6 +2,7 @@
 ![VLINK (2)](https://github.com/SeaTiger11/VLink/assets/81664473/2921aa6f-f982-4d3b-a4e8-97d80b96f16c)
 
 A link between Unity and Web3 for all devices
+
 (A submission for ETHShanghai)
 
 ### What is VLink?
@@ -22,4 +23,5 @@ http://vlinkweb.42web.io/
 
 ### Contact Details:
 Email: sv.missbehaving@gmail.com
+
 Discord: sea_tiger
